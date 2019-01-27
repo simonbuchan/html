@@ -1,0 +1,13 @@
+# Project
+.idea/workspace.xml
+
+# Node
+node_modules/
+
+# Build output
+dist/
+lib/
+lib-esm/
+
+# Logs, e.g. yarn-error.log
+*.log

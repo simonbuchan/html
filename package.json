@@ -1,0 +1,30 @@
+{
+  "name": "@simonbuchan/html",
+  "license": "MIT",
+  "version": "0.9.0",
+  "main": "lib/html.js",
+  "module": "lib-esm/html.js",
+  "types": "lib/html.d.ts",
+  "files": [
+    "dist",
+    "lib",
+    "lib-esm",
+    "src",
+    "README.md",
+    "rollup.config.js",
+    "tsconfig.json"
+  ],
+  "scripts": {
+    "prepublish": "yarn -s run build",
+    "build": "yarn run compile && yarn run bundle",
+    "compile": "yarn run compile:cjs && yarn run compile:esm",
+    "compile:cjs": "tsc --module commonjs --outDir lib --declaration --declarationMap",
+    "compile:esm": "tsc",
+    "bundle": "rollup -c"
+  },
+  "devDependencies": {
+    "rollup": "^1.1.2",
+    "rollup-plugin-terser": "^4.0.2",
+    "typescript": "~3.2.4"
+  }
+}

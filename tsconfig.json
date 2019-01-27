@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "module": "es2015",
+    "target": "es2018",
+    "strict": true,
+    "outDir": "lib-esm",
+    "sourceMap": true
+  },
+  "include":  [
+    "src"
+  ]
+}
