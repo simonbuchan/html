@@ -1,26 +1,26 @@
-// Stolen from hyper-html! Should work fine for now as it
-// just needs to not be in the template, not the content.
 import {
-  replacement,
+  collectChildNodes,
   createTemplate,
-  TemplateArgument,
   createTemplateInstance,
+  replacement,
   Template,
-  updateSlot, updateAttrValueSlot, collectChildNodes,
-} from './template';
+  TemplateArgument,
+  updateSlot,
+} from "./template";
 
-const templates = new Map<TemplateStringsArray, Template>();
+const templateSymbol = Symbol("template");
 
 export { TemplateArgument };
 
+declare global {
+  interface TemplateStringsArray {
+    [templateSymbol]?: Template;
+  }
+}
+
 /** Create some HTML content from a template string. */
 export default function html(strings: TemplateStringsArray, ...args: TemplateArgument[]): DocumentFragment {
-  let template = templates.get(strings);
-  if (!template) {
-    template = createTemplate(document, strings);
-    templates.set(strings, template);
-  }
-
+  const template = strings[templateSymbol] ??= createTemplate(document, strings);
   const { fragment } = createTemplateInstance(document, template, args);
   return fragment;
 }
@@ -29,11 +29,7 @@ html.el = htmlElement;
 html.element = htmlElement;
 /** Create an HTML element from a template string. */
 function htmlElement(strings: TemplateStringsArray, ...args: TemplateArgument[]): Element {
-  let template = templates.get(strings);
-  if (!template) {
-    template = createTemplate(document, strings);
-    templates.set(strings, template);
-  }
+  const template = strings[templateSymbol] ??= createTemplate(document, strings);
 
   if (template.content.childElementCount !== 1) {
     throw new Error(`html.element template should have a single top-level element: ${strings.join(replacement)}`);
@@ -44,7 +40,7 @@ function htmlElement(strings: TemplateStringsArray, ...args: TemplateArgument[])
   return fragment.firstElementChild!;
 }
 
-interface Instance {
+export interface Instance {
   fragment: DocumentFragment;
   node: Node | null;
   element: Element | null;
@@ -53,11 +49,11 @@ interface Instance {
   attrSlots: AttrSlot[];
 }
 
-interface Slot {
+export interface Slot {
   update(arg: TemplateArgument): void;
 }
 
-interface ChildSlot {
+export interface ChildSlot {
   nodes(): ChildNode[];
   range(): Range;
   clear(): void;
@@ -66,7 +62,7 @@ interface ChildSlot {
   replace(...items: Array<string | Node>): void;
 }
 
-interface AttrSlot {
+export interface AttrSlot {
   element: Element;
   name: string;
   remove(): void;
@@ -77,11 +73,7 @@ html.instance = htmlInstance;
 
 /** Create an API to dynamically update an HTML fragment from a template string. */
 function htmlInstance(strings: TemplateStringsArray, ...args: TemplateArgument[]): Instance {
-  let template = templates.get(strings);
-  if (!template) {
-    template = createTemplate(document, strings);
-    templates.set(strings, template);
-  }
+  const template = strings[templateSymbol] ??= createTemplate(document, strings);
 
   const { fragment, slots, attrValueSlots, nodeSlots } = createTemplateInstance(document, template, args);
 

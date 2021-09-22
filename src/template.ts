@@ -1,5 +1,7 @@
 import { nodeFromPath, NodePath, pathToNode } from './paths';
 
+// Stolen from hyper-html! Should work fine for now as it
+// just needs to not be in the template, not the content.
 export const replacement = '⚡';
 
 export interface TemplateNodeSlot {
