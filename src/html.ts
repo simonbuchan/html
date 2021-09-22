@@ -8,19 +8,22 @@ import {
   updateSlot,
 } from "./template";
 
-const templateSymbol = Symbol("template");
-
 export { TemplateArgument };
 
-declare global {
-  interface TemplateStringsArray {
-    [templateSymbol]?: Template;
+const templates = new WeakMap<TemplateStringsArray, Template>();
+
+function getTemplate(strings: TemplateStringsArray): Template {
+  let template = templates.get(strings);
+  if (!template) {
+    template = createTemplate(document, strings);
+    templates.set(strings, template);
   }
+  return template;
 }
 
 /** Create some HTML content from a template string. */
 export default function html(strings: TemplateStringsArray, ...args: TemplateArgument[]): DocumentFragment {
-  const template = strings[templateSymbol] ??= createTemplate(document, strings);
+  const template = getTemplate(strings);
   const { fragment } = createTemplateInstance(document, template, args);
   return fragment;
 }
@@ -29,7 +32,7 @@ html.el = htmlElement;
 html.element = htmlElement;
 /** Create an HTML element from a template string. */
 function htmlElement(strings: TemplateStringsArray, ...args: TemplateArgument[]): Element {
-  const template = strings[templateSymbol] ??= createTemplate(document, strings);
+  const template = getTemplate(strings);
 
   if (template.content.childElementCount !== 1) {
     throw new Error(`html.element template should have a single top-level element: ${strings.join(replacement)}`);
@@ -73,7 +76,7 @@ html.instance = htmlInstance;
 
 /** Create an API to dynamically update an HTML fragment from a template string. */
 function htmlInstance(strings: TemplateStringsArray, ...args: TemplateArgument[]): Instance {
-  const template = strings[templateSymbol] ??= createTemplate(document, strings);
+  const template = getTemplate(strings);
 
   const { fragment, slots, attrValueSlots, nodeSlots } = createTemplateInstance(document, template, args);
 
